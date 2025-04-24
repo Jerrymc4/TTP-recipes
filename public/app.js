@@ -53,7 +53,7 @@ function recipesApp() {
             },
             async submit () {
                 try {
-                    const newRecipe = await apiRequest('api/recipe/new?name=' + this.newRecipe.name + '&description=' + this.newRecipe.description + '&ingredients=' + JSON.stringify(this.newRecipe.ingredients));
+                    const newRecipe = await apiRequest('api/recipe/new?name=' + encodeURIComponent(this.newRecipe.name) + '&description=' + encodeURIComponent(this.newRecipe.description) + '&ingredients=' + encodeURIComponent(JSON.stringify(this.newRecipe.ingredients)));
                     this.recipes.unshift(this.createRecipeComponentFromData(newRecipe));
                     this.error = null;
                 } catch (error) {
