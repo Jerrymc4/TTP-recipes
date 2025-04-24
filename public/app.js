@@ -57,7 +57,12 @@ function recipesApp() {
                     this.recipes.unshift(this.createRecipeComponentFromData(newRecipe));
                     this.error = null;
                 } catch (error) {
-                    this.error = 'Error adding recipe!';
+                    /*  Updating the Error message to more descriptive but a better solution would be to:
+                     1. Change the endpoint to use POST instead of GET
+                     2. Send data as JSON in the request body
+                     3. Implement validation and error handling on the backend */
+                    
+                    this.error = 'Error! Please Add a Name and Description.';
                 }
             },
         },
