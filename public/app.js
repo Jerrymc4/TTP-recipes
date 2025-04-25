@@ -56,6 +56,11 @@ function recipesApp() {
                     const newRecipe = await apiRequest('api/recipe/new?name=' + encodeURIComponent(this.newRecipe.name) + '&description=' + encodeURIComponent(this.newRecipe.description) + '&ingredients=' + encodeURIComponent(JSON.stringify(this.newRecipe.ingredients)));
                     this.recipes.unshift(this.createRecipeComponentFromData(newRecipe));
                     this.error = null;
+
+                    this.newRecipe.name = '';
+                    this.newRecipe.description = '';
+                    this.newRecipe.ingredients = [];
+
                 } catch (error) {
                     /*  Updating the Error message to more descriptive but a better solution would be to:
                      1. Change the endpoint to use POST instead of GET
