@@ -11,7 +11,8 @@ class RecipeController extends Controller
 {
     public function index(): JsonResponse
     {
-        $recipes = Recipe::get();
+        //Improved this to avoid N+1 queries
+        $recipes = Recipe::with('ingredients')->get();
         $formattedRecipes = $recipes->map(function ($recipe) {
             return $this->formatRecipe($recipe);
         });
