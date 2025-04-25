@@ -12,21 +12,7 @@ class RecipeController extends Controller
     public function getRecipes(Request $request): JsonResponse
     {
         $recipes = Recipe::get();
-    
-        $formattedRecipes = $recipes->map(function ($recipe) {
-            return [
-                'id' => $recipe->id,
-                'name' => $recipe->name,
-                'description' => $recipe->description,
-                'ingredients' => $recipe->ingredients->map(function ($ingredient) {
-                    return [
-                        'id' => $ingredient->id,
-                        'name' => $ingredient->name,
-                    ];
-                }),
-            ];
-        });
-    
+        $formattedRecipes = $recipes->map([$this, 'formatRecipe']);
         return response()->json($formattedRecipes);
     }
 
@@ -47,17 +33,7 @@ class RecipeController extends Controller
             $recipe->ingredients()->save($ingredient);
         }
     
-        return response()->json([
-            'id' => $recipe->id,
-            'name' => $recipe->name,
-            'description' => $recipe->description,
-            'ingredients' => $recipe->ingredients->map(function ($ingredient) {
-                return [
-                    'id' => $ingredient->id,
-                    'name' => $ingredient->name,
-                ];
-            }),
-        ]);
+        return response()->json($this->formatRecipe($recipe));
     }
 
     public function update(Request $request, $id): JsonResponse
@@ -114,22 +90,31 @@ class RecipeController extends Controller
                 }
             }
             
-            // Return the updated recipe
-            return response()->json([
-                'id' => $recipe->id,
-                'name' => $recipe->name,
-                'description' => $recipe->description,
-                'ingredients' => $recipe->ingredients->fresh()->map(function ($ingredient) {
-                    return [
-                        'id' => $ingredient->id,
-                        'name' => $ingredient->name,
-                    ];
-                }),
-            ]);
+            // Refresh and return the updated recipe
+            $recipe->refresh();
+            return response()->json($this->formatRecipe($recipe));
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to update recipe: ' . $e->getMessage()
             ], 500);
         }
+    }
+    
+    /**
+     * Format a recipe for JSON response
+     */
+    private function formatRecipe(Recipe $recipe): array
+    {
+        return [
+            'id' => $recipe->id,
+            'name' => $recipe->name,
+            'description' => $recipe->description,
+            'ingredients' => $recipe->ingredients->map(function ($ingredient) {
+                return [
+                    'id' => $ingredient->id,
+                    'name' => $ingredient->name,
+                ];
+            }),
+        ];
     }
 }
