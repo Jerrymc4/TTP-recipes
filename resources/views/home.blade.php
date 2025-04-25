@@ -59,13 +59,13 @@
                         <div class="card">
                             <div x-show="!recipe.editing">
                                 <div class="flex">
-                                    <h3 class="recipe-title flex-grow" x-html="recipe.data.name"></h3>
+                                    <h3 class="recipe-title flex-grow" x-text="recipe.data.name"></h3>
                                     <button x-on:click="startEditingExistingRecipe(recipe)">Edit</button>
                                 </div>
-                                <p class="recipe-description" x-html="recipe.data.description"></p>
+                                <p class="recipe-description" x-text="recipe.data.description"></p>
                                 <ul>
                                     <template x-for="(ingredient, index) in recipe.data.ingredients" :key="index">
-                                        <li x-html="ingredient.name"></li>
+                                        <li x-text="ingredient.name"></li>
                                     </template>
                                 </ul>
                             </div>
