@@ -53,25 +53,40 @@ function recipesApp() {
                 this.newRecipe.ingredients.push('');
             },
             async submit () {
-                //Prevent multiple submissions
                 if (this.submitting) return;
+                
+                this.submitting = true;
                 try {
-                    this.submitting = true;
-                    const newRecipe = await apiRequest('api/recipe/new?name=' + encodeURIComponent(this.newRecipe.name) + '&description=' + encodeURIComponent(this.newRecipe.description) + '&ingredients=' + encodeURIComponent(JSON.stringify(this.newRecipe.ingredients)));
+                    const response = await fetch('api/recipe', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            name: this.newRecipe.name,
+                            description: this.newRecipe.description,
+                            ingredients: this.newRecipe.ingredients
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+                    
+                    const newRecipe = await response.json();
+                    
                     this.recipes.unshift(this.createRecipeComponentFromData(newRecipe));
                     this.error = null;
-
+                    
                     this.newRecipe.name = '';
                     this.newRecipe.description = '';
                     this.newRecipe.ingredients = [];
-
                 } catch (error) {
-                    /*  Updating the Error message to more descriptive but a better solution would be to:
-                     1. Change the endpoint to use POST instead of GET
-                     2. Send data as JSON in the request body
-                     3. Implement validation and error handling on the backend */
-                    
-                    this.error = 'Error! Please Add a Name and Description.';
+                    console.error('Error creating recipe:', error);
+                    this.error = error.message || 'Error creating recipe!';
                 } finally {
                     this.submitting = false;
                 }

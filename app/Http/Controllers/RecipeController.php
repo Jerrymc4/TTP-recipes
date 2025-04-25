@@ -11,7 +11,8 @@ class RecipeController extends Controller
 {
     public function index(): JsonResponse
     {
-        //Improved this to avoid N+1 queries
+        //Improved this to avoid N+1 queries 
+        // Could further improve performance with pagination
         $recipes = Recipe::with('ingredients')->orderBy('created_at', 'desc')
         ->get();
         $formattedRecipes = $recipes->map(function ($recipe) {
@@ -20,24 +21,38 @@ class RecipeController extends Controller
         return response()->json($formattedRecipes);
     }
 
-    public function newRecipe(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $name = $request->get('name');
-        $description = $request->get('description');
-        $ingredientNames = json_decode($request->get('ingredients'));
+        try {
+        $validator = validator($request->all(), [
+            'name' => ['required', 'string', 'max:255', 'regex:/^[^<>]*$/'],
+            'description' => ['required', 'string', 'regex:/^[^<>]*$/'],
+            'ingredients' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors()->first()
+            ], 422);
+        }
     
         $recipe = new Recipe();
-        $recipe->name = $name;
-        $recipe->description = $description;
+        $recipe->name = $request->input('name');
+        $recipe->description = $request->input('description');
         $recipe->save();
     
-        foreach ($ingredientNames as $ingredientName) {
+        foreach ($request->input('ingredients') as $ingredientName) {
             $ingredient = new Ingredient();
             $ingredient->name = $ingredientName;
             $recipe->ingredients()->save($ingredient);
         }
     
         return response()->json($this->formatRecipe($recipe));
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to create recipe: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, $id): JsonResponse
