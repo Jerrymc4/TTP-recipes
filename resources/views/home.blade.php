@@ -40,7 +40,9 @@
                             </p>
                         </div>
                         <p>
-                            <button class="primary" x-on:click="newRecipe.submit">Save</button>
+                            <button class="primary" x-on:click="newRecipe.submit" x-bind:disabled="newRecipe.submitting">
+                                <span x-text="newRecipe.submitting ? 'Saving...' : 'Save'"></span>
+                            </button>
                         </p>
                     </fieldset>
                 </div>

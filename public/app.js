@@ -48,11 +48,15 @@ function recipesApp() {
             description: '',
             ingredients: [],
             show: false,
+            submitting: false,
             addIngredient () {
                 this.newRecipe.ingredients.push('');
             },
             async submit () {
+                //Prevent multiple submissions
+                if (this.submitting) return;
                 try {
+                    this.submitting = true;
                     const newRecipe = await apiRequest('api/recipe/new?name=' + encodeURIComponent(this.newRecipe.name) + '&description=' + encodeURIComponent(this.newRecipe.description) + '&ingredients=' + encodeURIComponent(JSON.stringify(this.newRecipe.ingredients)));
                     this.recipes.unshift(this.createRecipeComponentFromData(newRecipe));
                     this.error = null;
@@ -68,6 +72,8 @@ function recipesApp() {
                      3. Implement validation and error handling on the backend */
                     
                     this.error = 'Error! Please Add a Name and Description.';
+                } finally {
+                    this.submitting = false;
                 }
             },
         },
