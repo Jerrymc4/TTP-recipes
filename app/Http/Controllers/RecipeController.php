@@ -9,10 +9,12 @@ use Illuminate\Http\Request;
 
 class RecipeController extends Controller
 {
-    public function getRecipes(Request $request): JsonResponse
+    public function index(): JsonResponse
     {
         $recipes = Recipe::get();
-        $formattedRecipes = $recipes->map([$this, 'formatRecipe']);
+        $formattedRecipes = $recipes->map(function ($recipe) {
+            return $this->formatRecipe($recipe);
+        });
         return response()->json($formattedRecipes);
     }
 
