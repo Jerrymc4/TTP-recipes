@@ -75,13 +75,32 @@ function recipesApp() {
         },
         async saveExistingRecipe (recipe) {
             try {
-                const editedRecipe = JSON.parse(JSON.stringify(recipe.editingData));
-
-                recipe.data = editedRecipe;
+                const response = await fetch(`api/recipe/${recipe.editingData.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        name: recipe.editingData.name,
+                        description: recipe.editingData.description,
+                        ingredients: recipe.editingData.ingredients
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || `Server error: ${response.status}`);
+                }
+                
+                recipe.data = data;
                 recipe.editing = false;
                 recipe.error = null;
             } catch (error) {
-                recipe.error = 'Error saving recipe!';
+                console.error(`Error saving recipe: ${error}`);
+                recipe.error = error.message || 'Error saving recipe!';
             }
         },
     };
